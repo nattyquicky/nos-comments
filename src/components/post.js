@@ -16,7 +16,8 @@ const styles = {
   }
 };
 
-const scriptHash = "3fe71d6e18ea7d069df34f93d211466550b5b0e3"
+//const scriptHash = "3fe71d6e18ea7d069df34f93d211466550b5b0e3"
+const scriptHash = "149f3264c4cd8d46e9a6c46261685b06cee22a3d"
 const known_integer_keys = []
 
 
@@ -30,7 +31,7 @@ class Post extends React.Component {
     var comments = post.get("comments")
 
     for (var i=0; i<comments.length; i++) {
-        list.push({"id": comments[i].get("user"), "content": comments[i].get("text")})
+        list.push({"id": comments[i][0], "content": comments[i][1]})
     }
 
     this.setState({
@@ -71,13 +72,25 @@ class Post extends React.Component {
     ]};
   }
 
-// =============== HELPER FUNCS ===============
+    // =============== HELPER FUNCS ===============
     // ============================================
     handleMap = async func => {
         var result = await func;
         var deserial = sc.deserialize(result)
         var map = this.process_map(deserial)
         return map
+    }
+
+    handleArray = async func => {
+        var result = await func;
+        var deserial = sc.deserialize(result)
+        // DEBUG
+        console.log(JSON.stringify(deserial, null, 4))
+        var array = this.process_array(deserial)
+        for (var i=0; i<array.length; i++) {
+            console.log(array[i]);
+        }
+        return array
     }
 
     process_map(d) {
@@ -141,19 +154,27 @@ class Post extends React.Component {
     //  "text": args[3],        (string)
     //  "comments": [] }        (string[])
     async get_post(postId) {
-        var q = await this.handleMap(this.handleStorage(postId, true, false))
+        var q = await this.handleArray(await this.handleStorage(postId, true, false))
+        console.log(JSON.stringify(q, null, 4)) 
+
+        var map = new Map()
+        map.set("user", q[0])
+        map.set("title", q[1])
+        map.set("text", q[2])
+        map.set("comments", q[3])
+
         // DEBUG
-        for (var [key, value] of q) {
+        for (var [key, value] of map) {
           console.log(key + ' = ' + value);
           if (key == "comments") {
             if (value.length > 0) {
               for (var [k,v] of value[0]) {
-                  console.log(k + ' = ' + v);
-              }
-            }
-          }
-        }
-        return q
+                  console.log(k + ' = ' + v); 
+              }   
+            }   
+          }   
+        }   
+        return map 
     }
 
     // get all posts - returns map:
@@ -346,7 +367,6 @@ class Post extends React.Component {
 
                           <div className="comment-inner">
                             <div className="comment-info">{item.id}</div>
-                            //<div className="post-date">1 week ago</div>
                             <div className="text">{item.content}</div>
                           </div>
                         </div>
@@ -357,7 +377,7 @@ class Post extends React.Component {
 
                 <div className="comment-form">
                   <div className="sec-title">
-                    <h2>Create New Topic</h2>
+                    <h2>Add New Comment</h2>
                   </div>
 
                   <div className="form-group">

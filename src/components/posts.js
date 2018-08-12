@@ -16,7 +16,8 @@ const styles = {
   }
 };
 
-const scriptHash = "3fe71d6e18ea7d069df34f93d211466550b5b0e3"
+//const scriptHash = "3fe71d6e18ea7d069df34f93d211466550b5b0e3"
+const scriptHash = "149f3264c4cd8d46e9a6c46261685b06cee22a3d"
 const known_integer_keys = []
 
 class Posts extends React.Component {
@@ -35,10 +36,11 @@ class Posts extends React.Component {
     var posts = await this.get_all_posts()
     var list = []
 
-    for (var [id, text] of posts) {
-        var p = await this.get_post(id)
+    //for (var [id, text] of posts) {
+    for (var i=0; i<posts.length; i++) {
+        var p = await this.get_post(posts[i])
         var describe = p.get("text").replace(/(([^\s]+\s\s*){20})(.*)/,"$1...");
-        list.push({"id": id, "topic": p.get("title"), "describe": describe, "number_of_comments": p.get("comments").length, "text": p.get("text")})
+        list.push({"id": posts[i], "topic": p.get("title"), "describe": describe, "number_of_comments": p.get("comments").length, "text": p.get("text")})
     }
 
     // sort
@@ -132,6 +134,18 @@ class Posts extends React.Component {
         return map
     }
 
+    handleArray = async func => {
+        var result = await func;
+        var deserial = sc.deserialize(result)
+        // DEBUG
+        console.log(JSON.stringify(deserial, null, 4))
+        var array = this.process_array(deserial)
+        for (var i=0; i<array.length; i++) {
+            console.log(array[i]);
+        }
+        return array
+    }
+
     process_map(d) {
         if (d.type != "Map") {
             return null
@@ -193,9 +207,17 @@ class Posts extends React.Component {
     //  "text": args[3],        (string)
     //  "comments": [] }        (string[])
     async get_post(postId) {
-        var q = await this.handleMap(this.handleStorage(postId, true, false))
+        var q = await this.handleArray(await this.handleStorage(postId, true, false))
+        console.log(JSON.stringify(q, null, 4))
+
+        var map = new Map()
+        map.set("user", q[0])
+        map.set("title", q[1])
+        map.set("text", q[2])
+        map.set("comments", q[3])
+
         // DEBUG
-        for (var [key, value] of q) {
+        for (var [key, value] of map) {
           console.log(key + ' = ' + value);
           if (key == "comments") {
             if (value.length > 0) {
@@ -205,17 +227,17 @@ class Posts extends React.Component {
             }
           }
         }
-        return q
+        return map
     }
 
     // get all posts - returns map:
     // {"postID" : "postTitle"}     (string)
     async get_all_posts() {
-        var q = await this.handleMap(this.handleStorage("GET_ALL_IDS", true, false))
+        var q = await this.handleArray(await this.handleStorage("GET_ALL_IDS", true, false))
         // DEBUG
-        for (var [key, value] of q) {
-          console.log(key + ' = ' + value);
-        }
+      //for (var [key, value] of q) {
+      //  console.log(key + ' = ' + value);
+      //}
         return q
     }
 
