@@ -50,25 +50,6 @@ class Post extends React.Component {
     title: "",
     desc: "",
     comments: [
-    //  // comments
-    //  {
-    //    id: 1,
-    //    content: "follow title1 comments1 abc...",
-    //    postDate: "2018-03-22",
-    //    postId: 1
-    //  },
-    //  {
-    //    id: 2,
-    //    content: "follow title1 comments2 efgggg...",
-    //    postDate: "2018-03-22",
-    //    postId: 1
-    //  },
-    //  {
-    //    id: 3,
-    //    content: "follow title1 comments3 xvdg...",
-    //    postDate: "2018-03-22",
-    //    postId: 1
-    //  }
     ]};
   }
 
@@ -127,7 +108,12 @@ class Post extends React.Component {
     convert_type(v) {
         var value;
         if (v.type == "ByteArray") {
-            value = u.hexstring2str(v.value)
+            if (wallet.isScriptHash(v.value)) {
+                value = wallet.getAddressFromScriptHash(u.reverseHex(v.value))
+            }   
+            else {
+                value = u.hexstring2str(v.value)
+            }
         }
         if (v.type == "Integer") {
             value = parseInt(u.reverseHex(v.value), 16)
