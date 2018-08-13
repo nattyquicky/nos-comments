@@ -8,7 +8,7 @@ import injectSheet from "react-jss";
 import PropTypes from "prop-types";
 import { injectNOS, nosProps } from "@nosplatform/api-functions/lib/react";
 // import "./App.css";
-// import "./post/css/style.css";
+import "./css/style.css";
 const styles = {
   button: {
     margin: "16px",
@@ -24,9 +24,9 @@ class Posts extends React.Component {
 
     randomize() {
       var text = "";
-      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      var possible = "0123456789";
 
-      for (var i = 0; i < 10; i++)
+      for (var i = 0; i < 6; i++)
         text += possible.charAt(Math.floor(Math.random() * possible.length));
 
       return text;
@@ -59,27 +59,6 @@ class Posts extends React.Component {
         super(props);
         this.state = {
           posts: [
-//          {
-//            id: 1,
-//            topic: "Ethereum Needs Incentive for Growth",
-//            number_of_comments: 45,
-//            describe:
-//              "This week, Ethereum tried to follow Bitcoin higher, but so far its dynamics falls behind that of the flagship. On Wednesday, July 25, Ethereum trades at 473.52 and is a little bit behind.          It is remarkable how the events developed during the last day. Ethereum experienced fast growth, having started from the support at 450.00 and reaching 485.00 during one session. The cryptocurrency stopped at 479.00 from which point a small local correction started. The day before, the traded value of Ethereum was double the average daily values."
-//          },
-//          {
-//            id: 2,
-//            topic: "Bitcoin Price Rally Stalls Ahead of CME Futures Expiry",
-//            number_of_comments: 32,
-//            describe:
-//              "The significant technical resistance for Ethereum is at the level of 482.00. The 50-DMA level, which is still limiting the growth impulse, goes along this same line. In case the cryptocurrency succeeds to break out this point and rise higher, the way to 500.00 and later to 515.00-516.00 will open. If Ethereum is not able to break out the indicated resistance effectively, the ambient background will compel investors to sell the cryptocurrency until the price goes down to 460.00 – the area of intermediate support. The key support level for Ethereum is at 421.00"
-//          },
-//          {
-//            id: 3,
-//            topic: "Facebook Crashes After-Hours Despite Trade-Deal Rally",
-//            number_of_comments: 36,
-//            describe:
-//              "Among the fundamental information important for Ethereum, one should pay attention to the announcement of the creation of MyEtherWallet mobile app (a wallet for cryptocurrencies). Cryptocurrency on your smartphone screen is a new and productive step forward, which certainly is positive for virtual currencies on the whole and for Ethereum in particular. MEW Connect app reportedly has been created in order to significantly simplify the use of a wallet, as well as, to solve several security issues at the same time"
-//          }
           ]
         };
   }
@@ -298,68 +277,191 @@ class Posts extends React.Component {
         console.log(txid);
     }
 
+  handleSearch = () => {
+    if (isNaN(this.searchInput.value) || this.searchInput.value == "") {
+      let sortedposts = Object.assign([], this.state.posts);
+      sortedposts.sort((a, b) => {
+        return a.id - b.id;
+      });
+      this.setState({ searchAction: false });
+    } else {
+      this.setState({ searchAction: true });
+      const filterdPost = this.state.posts.filter(
+        p => p.id === this.searchInput.value
+      );
+      this.setState({ searchResult: filterdPost });
+    }
+  };
 
-  render() {
+  handleChange(e) {
+    console.log("here");
+    console.log(e.target.value);
+    //const searchInput = e.target.validity.valid ? parseInt(e.target.value) : "";
+    const searchInput = e.target.validity.valid ? e.target.value : "";
+    console.log("SERACH INPUT = " + searchInput);
+    console.log(searchInput == "");
+    this.setState({ searchInput: searchInput });
+    //this.handleSearch()
+  }
+
+render() {
+    let ids = [];
+    this.state.posts.map((item, index) => {
+      ids.push(item.id);
+    });
+    console.log("***** IDs = " + ids);
+
     return (
       <div className="sidebar-page-container">
         <div className="auto-container">
+          <div className="comment-form col-md-4 pull-right">
+            <div className="row">
+              <div className="col-md-8  form-group ">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="title"
+                  pattern="[0-9]*"
+                  placeholder="Search by ID"
+                  ref={input => {
+                    this.searchInput = input;
+                  }}
+                  onChange={e => {
+                    this.handleChange(e);
+                  }}
+                  value={this.state.searchInput}
+                />
+              </div>
+              <div className="col-md-4  form-group">
+                <button
+                  type="submit"
+                  className="theme-btn"
+                  onClick={this.handleSearch}
+                >
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="clear-line" />
           <form onSubmit={this.handleSubmit} className="centerBlock">
             <div className="sec-title">
               <h2>posts List</h2>
             </div>
+            <div className="heading">
+              <div className="row">
+                <div className="col-md-1  text-center">No.</div>
 
-            <div className="row heading">
-              <div className="col-md-1  text-center">No.</div>
-
-              <div className="col-md-7">Description</div>
-              <div className="col-md-2  text-center">Most commented</div>
-              <div className="col-md-2  text-center">Action</div>
+                <div className="col-md-7">Description</div>
+                <div className="col-md-2  text-center">Most commented</div>
+                <div className="col-md-2  text-center">Action</div>
+              </div>
             </div>
+            {this.state.searchAction ? (
+              ids.indexOf(this.state.searchInput) !== -1 ? (
+                this.state.searchResult.map((item, index) => {
+                  return (
+                    <div key={index} className="news-block-four">
+                      <div className="inner-box">
+                        <div className="content-box">
+                          <div className="row">
+                            <div className="col-md-1  text-center">
+                              <b>{item.id}</b>
+                            </div>
+                            <div className="col-md-7">
+                              <h3>
+                                <Link
+                                  to={{
+                                    pathname: `/post/${item.id}`,
+                                    state: { post: item }
+                                  }}
+                                >
+                                  {item.topic}
+                                </Link>
+                              </h3>
 
-            {this.state.posts.map((item, index) => {
-              return (
-                <div key={index} className="news-block-four">
+                              <div className="text"> {item.describe}</div>
+                            </div>
+
+                            <div className="col-md-2  text-center">
+                              {item.number_of_comments}
+                            </div>
+                            <div className="col-md-2  text-center">
+                              <Link
+                                to={{
+                                  pathname: `/post/${item.id}`,
+                                  state: { post: item }
+                                }}
+                                className="read-more"
+                              >
+                                Detail
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="news-block-four">
                   <div className="inner-box">
                     <div className="content-box">
                       <div className="row">
-                        <div className="col-md-1  text-center">
-                          <b>{item.id}</b>
-                        </div>
-                        <div className="col-md-7">
-                          <h3>
-                            <Link
-                              to={{
-                                pathname: `/post/${item.id}`,
-                                state: { post: item }
-                              }}
-                            >
-                              {item.topic}
-                            </Link>
-                          </h3>
-
-                          <div className="text"> {item.describe}</div>
-                        </div>
-
-                        <div className="col-md-2  text-center">
-                          {item.number_of_comments}
-                        </div>
-                        <div className="col-md-2  text-center">
-                          <Link
-                            to={{
-                              pathname: `/post/${item.id}`,
-                              state: { post: item }
-                            }}
-                            className="read-more"
-                          >
-                            Detail
-                          </Link>
+                        <div className="col-md-12  text-center">
+                          <b>The Post with ID Not Found</b>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              );
-            })}
+              )
+            ) : (
+              this.state.posts.map((item, index) => {
+                return (
+                  <div key={index} className="news-block-four">
+                    <div className="inner-box">
+                      <div className="content-box">
+                        <div className="row">
+                          <div className="col-md-1  text-center">
+                            <b>{item.id}</b>
+                          </div>
+                          <div className="col-md-7">
+                            <h3>
+                              <Link
+                                to={{
+                                  pathname: `/post/${item.id}`,
+                                  state: { post: item }
+                                }}
+                              >
+                                {item.topic}
+                              </Link>
+                            </h3>
+
+                            <div className="text"> {item.describe}</div>
+                          </div>
+
+                          <div className="col-md-2  text-center">
+                            {item.number_of_comments}
+                          </div>
+                          <div className="col-md-2  text-center">
+                            <Link
+                              to={{
+                                pathname: `/post/${item.id}`,
+                                state: { post: item }
+                              }}
+                              className="read-more"
+                            >
+                              Detail
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
 
             <div className="comment-form">
               <div className="sec-title">

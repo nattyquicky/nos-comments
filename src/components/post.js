@@ -3,7 +3,7 @@ import React from "react";
 import { Radio, input } from "bootstrap";
 // import "./App.css";
 import bg from "../assets/img/bg7.jpg";
-// import "./post/css/style.css";
+import "./css/style.css";
 import {sc, u, wallet} from "@cityofzion/neon-js";
 import injectSheet from "react-jss";
 import PropTypes from "prop-types";
@@ -293,7 +293,7 @@ class Post extends React.Component {
             {/* <hr style={{ borderWidth: 1 }} /> */}
             <div>
               <h4 className="card-title">
-                {this.props.location.state.post.topic}
+                <b>{this.props.location.state.post.topic}</b>
               </h4>
               <div className="text">
                 {this.props.location.state.post.text}
@@ -352,7 +352,7 @@ class Post extends React.Component {
                           </div>
 
                           <div className="comment-inner">
-                            <div className="comment-info">{item.id}</div>
+                            <div className="comment-info"><i>User: {item.id}</i></div>
                             <div className="text">{item.content}</div>
                           </div>
                         </div>
